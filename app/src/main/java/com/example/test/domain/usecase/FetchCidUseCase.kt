@@ -6,8 +6,8 @@ class FetchCidUseCase(
     private val repository: IpfsRepository,
 ) {
 
-    suspend operator fun invoke(cid: String): String {
-        return repository.fetchCid(cid)
+    suspend operator fun invoke(): String {
+        return repository.fetchCid()
     }
 }
 

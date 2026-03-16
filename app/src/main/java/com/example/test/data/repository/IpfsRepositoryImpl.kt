@@ -7,9 +7,9 @@ class IpfsRepositoryImpl(
     private val client: IpfsClient,
 ) : IpfsRepository {
 
-    override suspend fun fetchCid(cid: String): String {
+    override suspend fun fetchCid(): String {
         return try {
-            client.fetchCid(cid)
+            client.fetchCid()
         } catch (e: Exception) {
             if (e is IllegalArgumentException) throw e
             throw RuntimeException("Failed to fetch CID", e)

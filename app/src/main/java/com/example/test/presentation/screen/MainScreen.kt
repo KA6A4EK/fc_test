@@ -1,6 +1,8 @@
 package com.example.test.presentation.screen
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,16 +29,16 @@ import com.example.test.ui.theme.TestTheme
 @Composable
 fun MainScreen(
     state: UiState,
-    onFetchCid: (String) -> Unit,
+    onFetchCid: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var cidInput by remember { mutableStateOf("") }
 
     Column(
         modifier = modifier
             .fillMaxSize()
             .padding(16.dp),
         horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.Center
     ) {
         Text(
             text = "IPFS / libp2p monitor",
@@ -59,21 +61,17 @@ fun MainScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        OutlinedTextField(
-            value = cidInput,
-            onValueChange = { cidInput = it },
-            label = { Text("CID") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text("Enter CID (e.g. Qm...)") },
-        )
+
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Button(
-            onClick = { onFetchCid(cidInput.trim()) },
-            enabled = !state.loading && cidInput.isNotBlank(),
-        ) {
+        Row() {
+            Button(
+                onClick = { onFetchCid() },
+                enabled = !state.loading,
+            ) {
+                Text("Fetch CID")
+            }
             if (state.loading) {
                 CircularProgressIndicator(
                     modifier = Modifier
@@ -82,9 +80,7 @@ fun MainScreen(
                     strokeWidth = 2.dp,
                 )
             }
-            Text("Fetch CID")
         }
-
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(

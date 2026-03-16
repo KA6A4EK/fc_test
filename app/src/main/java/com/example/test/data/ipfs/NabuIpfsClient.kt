@@ -21,11 +21,11 @@ class NabuIpfsClient(
     private val pingTestCid: String = IpfsConfig.PING_TEST_CID,
 ) : IpfsClient {
 
-    override suspend fun fetchCid(cid: String): String = withContext(Dispatchers.IO) {
+    override suspend fun fetchCid(): String = withContext(Dispatchers.IO) {
         val ipfs = ipfsHolder.get()
         withTimeout(fetchTimeout.inWholeMilliseconds) {
             val decoded = try {
-                Cid.decode(cid)
+                Cid.decode(pingTestCid)
             } catch (e: Exception) {
                 throw IllegalArgumentException("Invalid CID format", e)
             }

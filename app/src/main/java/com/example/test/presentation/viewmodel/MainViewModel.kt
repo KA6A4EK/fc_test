@@ -28,11 +28,11 @@ class MainViewModel @Inject constructor(
         startPingLoop()
     }
 
-    fun onFetchCid(cid: String) {
+    fun onFetchCid() {
         viewModelScope.launch {
             _uiState.update { it.copy(loading = true, cidError = null) }
             try {
-                val result = fetchCidUseCase(cid)
+                val result = fetchCidUseCase()
                 _uiState.update {
                     it.copy(
                         cidResult = result,
