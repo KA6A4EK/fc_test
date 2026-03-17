@@ -14,6 +14,6 @@ object IpfsConfig {
     /** CID used for ping (lightweight getBlocks call). From assignment. */
     const val PING_TEST_CID: String = "QmTBimFzPPP2QsB7TQGc2dr4BZD4i7Gm2X1mNtb6DqN9Dr"
 
-    val fetchTimeout: Duration = 10.seconds
-    val pingTimeout: Duration = 2.seconds
+    val fetchTimeout: Duration = 30.seconds
+    val pingTimeout: Duration = 10.seconds
 }

@@ -29,7 +29,6 @@ import org.peergos.protocol.http.HttpProtocol
  * Holds [EmbeddedIpfs] and builds it asynchronously on a background thread
  * so the main thread is not blocked at app startup.
  */
-@Singleton
 class IpfsHolder @Inject constructor(
     @ApplicationContext private val context: Context,
 ) {

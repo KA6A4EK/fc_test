@@ -1,8 +1,11 @@
 package com.example.test.data.ipfs
 
+import android.content.Context
 import com.example.test.di.IpfsConfig
 import com.example.test.di.IpfsHolder
+import dagger.hilt.android.qualifiers.ApplicationContext
 import io.ipfs.cid.Cid
+import io.libp2p.core.ConnectionClosedException
 import io.libp2p.core.multiformats.Multiaddr
 import io.libp2p.protocol.PingController
 import kotlinx.coroutines.Dispatchers
@@ -17,14 +20,15 @@ import kotlin.time.Duration
  * Uses [IpfsHolder] for lazy async init; only [fetchCid] and [ping] are required by the app.
  */
 class NabuIpfsClient(
-    private val ipfsHolder: IpfsHolder,
     private val fetchTimeout: Duration = IpfsConfig.fetchTimeout,
     private val pingTimeout: Duration = IpfsConfig.pingTimeout,
     private val pingTestCid: String = IpfsConfig.PING_TEST_CID,
-) : IpfsClient {
+    @ApplicationContext private val context: Context,
+    ) : IpfsClient {
 
+    private var ipfsHolder : IpfsHolder? = null
     override suspend fun fetchCid(): String = withContext(Dispatchers.IO) {
-        val ipfs = ipfsHolder.get()
+        val ipfs = getIpfsHolder().get()
         withTimeout(fetchTimeout.inWholeMilliseconds) {
             val decoded = try {
                 Cid.decode(pingTestCid)
@@ -47,8 +51,9 @@ class NabuIpfsClient(
 
     override suspend fun ping(): Long = withContext(Dispatchers.IO) {
         withTimeout(pingTimeout) {
+
             if (pingController == null) {
-                val ipfs = ipfsHolder.get()
+                val ipfs = getIpfsHolder().get()
                 val host = ipfs.node
 
                 val peerMultiaddr = Multiaddr(IpfsConfig.IPFS_MULTIADDRESS)
@@ -65,9 +70,32 @@ class NabuIpfsClient(
                     .controller
                     .await()
 
+
             }
-            pingController!!.ping().await()
+            try {
+            pingController?.ping()?.await()?: 0
+            }
+            catch (e : ConnectionClosedException){
+                e
+                pingController=null
+                ipfsHolder = null
+                Long.MAX_VALUE
+            }
+            catch (e : Exception){
+                e
+                pingController=null
+                ipfsHolder = null
+                Long.MAX_VALUE
+            }
 
         }
+    }
+
+    private fun getIpfsHolder() : IpfsHolder  {
+        if (ipfsHolder==null){
+            ipfsHolder = IpfsHolder(context)
+            ipfsHolder?.warmUp()
+        }
+        return ipfsHolder!!
     }
 }

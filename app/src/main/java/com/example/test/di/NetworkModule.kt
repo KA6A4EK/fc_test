@@ -1,5 +1,6 @@
 package com.example.test.di
 
+import android.content.Context
 import com.example.test.data.ipfs.IpfsClient
 import com.example.test.data.ipfs.NabuIpfsClient
 import com.example.test.data.repository.IpfsRepositoryImpl
@@ -9,6 +10,7 @@ import com.example.test.domain.usecase.PingNodeUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
@@ -18,12 +20,12 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideIpfsClient(holder: IpfsHolder): IpfsClient {
+    fun provideIpfsClient(@ApplicationContext context: Context): IpfsClient {
         return NabuIpfsClient(
-            ipfsHolder = holder,
             fetchTimeout = IpfsConfig.fetchTimeout,
             pingTimeout = IpfsConfig.pingTimeout,
             pingTestCid = IpfsConfig.PING_TEST_CID,
+            context = context
         )
     }
 
