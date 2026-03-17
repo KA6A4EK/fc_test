@@ -43,27 +43,31 @@ class NabuIpfsClient(
         }
     }
 
+    private var pingController: PingController? = null
 
     override suspend fun ping(): Long = withContext(Dispatchers.IO) {
         withTimeout(pingTimeout) {
-            val ipfs = ipfsHolder.get()
-            val host = ipfs.node
+            if (pingController == null) {
+                val ipfs = ipfsHolder.get()
+                val host = ipfs.node
 
-            val peerMultiaddr = Multiaddr(IpfsConfig.IPFS_MULTIADDRESS)
-            val peerId = requireNotNull(peerMultiaddr.getPeerId()) {
-                "PeerId not found in multiaddr"
+                val peerMultiaddr = Multiaddr(IpfsConfig.IPFS_MULTIADDRESS)
+                val peerId = requireNotNull(peerMultiaddr.getPeerId()) {
+                    "PeerId not found in multiaddr"
+                }
+
+                pingController = host
+                    .newStream<PingController>(
+                        listOf("/ipfs/ping/1.0.0"),
+                        peerId,
+                        peerMultiaddr
+                    )
+                    .controller
+                    .await()
+
             }
+            pingController!!.ping().await()
 
-            val controller = host
-                .newStream<PingController>(
-                    listOf("/ipfs/ping/1.0.0"),
-                    peerId,
-                    peerMultiaddr
-                )
-                .controller
-                .await()
-
-            controller.ping().await()
         }
     }
 }
