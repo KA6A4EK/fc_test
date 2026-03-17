@@ -26,6 +26,7 @@ class MainActivity : ComponentActivity() {
                 MainScreen(
                     state = state,
                     onFetchCid = viewModel::onFetchCid,
+                    startPing = { viewModel.startPingLoop() }
                 )
             }
         }

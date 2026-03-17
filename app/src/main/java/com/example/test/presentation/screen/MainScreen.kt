@@ -14,6 +14,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,8 +31,14 @@ import com.example.test.ui.theme.TestTheme
 fun MainScreen(
     state: UiState,
     onFetchCid: () -> Unit,
+    startPing :() -> Unit,
     modifier: Modifier = Modifier,
 ) {
+
+    LaunchedEffect(Unit)
+    {
+        startPing()
+    }
 
     Column(
         modifier = modifier
@@ -120,6 +127,7 @@ private fun MainScreenPreview() {
                 pingError = null,
             ),
             onFetchCid = {},
+            startPing  = {}
         )
     }
 }

@@ -3,12 +3,14 @@ package com.example.test.data.ipfs
 import com.example.test.di.IpfsConfig
 import com.example.test.di.IpfsHolder
 import io.ipfs.cid.Cid
+import io.libp2p.core.multiformats.Multiaddr
+import io.libp2p.protocol.PingController
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.future.await
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import org.peergos.Want
 import kotlin.time.Duration
-import kotlin.time.measureTime
 
 /**
  * IPFS client implementation using Peergos Nabu (EmbeddedIpfs).
@@ -31,21 +33,37 @@ class NabuIpfsClient(
             }
             val wants = listOf(Want(decoded))
             val blocks = ipfs.getBlocks(wants, emptySet(), true)
+
             val data = blocks.firstOrNull()?.block
                 ?: throw IllegalStateException("Block not found for CID")
-            data.toString(Charsets.UTF_8)
+
+            data.decodeToString().replace(Regex("[^\\p{L}\\p{N}\\p{P}\\p{Z}]"), "")
+
+
         }
     }
 
+
     override suspend fun ping(): Long = withContext(Dispatchers.IO) {
-        val ipfs = ipfsHolder.get()
-        val testCid = Cid.decode(pingTestCid)
-        val elapsed = measureTime {
-            withTimeout(pingTimeout.inWholeMilliseconds) {
-                val wants = listOf(Want(testCid))
-                ipfs.getBlocks(wants, emptySet(), true)
+        withTimeout(pingTimeout) {
+            val ipfs = ipfsHolder.get()
+            val host = ipfs.node
+
+            val peerMultiaddr = Multiaddr(IpfsConfig.IPFS_MULTIADDRESS)
+            val peerId = requireNotNull(peerMultiaddr.getPeerId()) {
+                "PeerId not found in multiaddr"
             }
+
+            val controller = host
+                .newStream<PingController>(
+                    listOf("/ipfs/ping/1.0.0"),
+                    peerId,
+                    peerMultiaddr
+                )
+                .controller
+                .await()
+
+            controller.ping().await()
         }
-        elapsed.inWholeMilliseconds
     }
 }

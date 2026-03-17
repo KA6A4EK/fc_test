@@ -24,9 +24,6 @@ class MainViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(UiState())
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
-    init {
-        startPingLoop()
-    }
 
     fun onFetchCid() {
         viewModelScope.launch {
@@ -58,7 +55,7 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    private fun startPingLoop() {
+    fun startPingLoop() {
         viewModelScope.launch {
             while (isActive) {
                 try {
